@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 namespace PathFinding
 {
     /// <summary>
-    /// 
+    /// A maze object which holds the map array data 
+    /// exposing it as a public property.
     /// </summary>
     public class Maze
     {
@@ -29,6 +30,11 @@ namespace PathFinding
         {
             get { return map; }
         }
+        
+        /// <summary>
+        /// Allows the creation of a Maze object by reading the pixel values from the image
+        /// </summary>
+        /// <param name="image">A valid image file</param>
         public Maze(Bitmap image)
         {
             map = new Map(image.Width, image.Height);
@@ -43,22 +49,21 @@ namespace PathFinding
         /// <summary>
         /// Allow us to save as a file based on the current content of map.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="imageFormat"></param>
+        /// <param name="fileName">Name for the output file</param>
+        /// <param name="imageFormat">Supported formats include Bmp, Gif, png and all the other formats define in the ImageFormat enumeration </param>
         public void Save(String fileName, ImageFormat imageFormat)
         {
             using (Bitmap bitmap = new Bitmap(map.Width, map.Height, PixelFormat.Format1bppIndexed))
             {
-
                 Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
                 BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
 
-                IntPtr ptr = bmpData.Scan0;
+                IntPtr pointer = bmpData.Scan0;
 
                 var bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
                 var rgbValues = new byte[bytes];
 
-                Marshal.Copy(ptr, rgbValues, 0, bytes);
+                Marshal.Copy(pointer, rgbValues, 0, bytes);
 
                 for (int y = 0; y < map.Height; y++)
                 {
@@ -86,22 +91,28 @@ namespace PathFinding
                     }
                 }
 
-                Marshal.Copy(rgbValues, 0, ptr, bytes);
+                Marshal.Copy(rgbValues, 0, pointer, bytes);
                 bitmap.UnlockBits(bmpData);
                 bitmap.Save(fileName, imageFormat);
             }
         }
 
+        /// <summary>
+        /// Allow us to save as an image file based on calculated Path
+        /// </summary>
+        /// <param name="fileName">Name for the output file</param>
+        /// <param name="imageFormat">Supported formats include Bmp, Gif, png and all the other formats define in the ImageFormat enumeration </param>
+        /// <param name="path"> List of map points equivalent to the map array</param>
         public void Save(String fileName, ImageFormat imageFormat, List<MPoint> path)
         {
 
-            using (Bitmap objBmpImage = new Bitmap(map.Width-1, map.Height-1, PixelFormat.Format4bppIndexed))
+            using (Bitmap bitmap = new Bitmap(map.Width-1, map.Height-1, PixelFormat.Format4bppIndexed))
             {
-                Rectangle rect = new Rectangle(0, 0, objBmpImage.Width, objBmpImage.Height);
-                BitmapData bmpData = objBmpImage.LockBits(rect, ImageLockMode.ReadWrite, objBmpImage.PixelFormat);
+                Rectangle frame = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+                BitmapData bmpData = bitmap.LockBits(frame, ImageLockMode.ReadWrite, bitmap.PixelFormat);
                 IntPtr pointer = bmpData.Scan0;
 
-                int bytes = Math.Abs(bmpData.Stride) * objBmpImage.Height;
+                int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
                 byte[] rgbValues = new byte[bytes];
 
                 Marshal.Copy(pointer, rgbValues, 0, bytes);
@@ -112,39 +123,38 @@ namespace PathFinding
                     int x = 0;
                     for (int i = 0; i < bmpData.Stride; i++)
                     {
-                        if (x >= objBmpImage.Width)
+                        if (x >= bitmap.Width)
                         {
                             break;
                         }
 
-                        BitArray bitar = new BitArray(8);
+                        BitArray bitArray = new BitArray(8);
 
                         for (int j = 4; j >= 0; j = j - 4)
                         {
                             if (map[x, y])
                             {
-                                bitar[j + 3] = true;
-                                bitar[j + 2] = true;
-                                bitar[j + 1] = true;
-                                bitar[j + 0] = true;
+                                bitArray[j + 3] = true;
+                                bitArray[j + 2] = true;
+                                bitArray[j + 1] = true;
+                                bitArray[j + 0] = true;
                             }
                             else
                             {
-                                bitar[j + 3] = false;
-                                bitar[j + 2] = false;
-                                bitar[j + 1] = false;
-                                bitar[j + 0] = false;
+                                bitArray[j + 3] = false;
+                                bitArray[j + 2] = false;
+                                bitArray[j + 1] = false;
+                                bitArray[j + 0] = false;
                             }
                             x++;
                         }
-                        rgbValues[counter] = (byte)GetIntFromBitArray(bitar);
+                        rgbValues[counter] = (byte)GetIntFromBitArray(bitArray);
                         counter++;
                     }
                 }
 
                 for (int i = 0; i < path.Count; i++)
                 {
-                    long percent = 100L * (long)(i + 1) / (long)path.Count;
                     MPoint point = path[i];
                     int xrest = point.X % 2;
 
@@ -159,7 +169,7 @@ namespace PathFinding
                         xtra = 0;
                     }
 
-                    //start represented as red
+                    //per requirement the start point is represented as red
                     if (i == 0)
                     {
                         bitar[xtra + 3] = true;
@@ -168,14 +178,14 @@ namespace PathFinding
                         bitar[xtra + 0] = true;
 
                     }
-                    else if (i == path.Count - 1) //end represented as blue
+                    else if (i == path.Count - 1) //per requirement the end point is represented as blue
                     {
                         bitar[xtra + 3] = false;
                         bitar[xtra + 2] = true;
                         bitar[xtra + 1] = false;
                         bitar[xtra + 0] = false;
                     }
-                    else //green
+                    else //per requirement solution will be highlited in green
                     {
                         bitar[xtra + 3] = true;
                         bitar[xtra + 2] = false;
@@ -186,18 +196,23 @@ namespace PathFinding
                 }
 
                 Marshal.Copy(rgbValues, 0, pointer, bytes);
-                objBmpImage.UnlockBits(bmpData);
-                objBmpImage.Save(fileName, imageFormat);
+                bitmap.UnlockBits(bmpData);
+                bitmap.Save(fileName, imageFormat);
             }
         }
 
-        private void LoadBitmapAsMap(Bitmap bmp)
+        /// <summary>
+        /// Set the values for the map in memory
+        /// </summary>
+        /// <remarks>This mapper will actually identify the blu and red points, needed by the pathfinder</remarks>
+        /// <param name="image">A valid image</param>
+        private void LoadBitmapAsMap(Bitmap image)
         {
-            for (int y = 0; y < bmp.Height; y++)
+            for (int y = 0; y < image.Height; y++)
             {
-                for (int x = 0; x < bmp.Width; x++)
+                for (int x = 0; x < image.Width; x++)
                 {
-                    var currentPixel = bmp.GetPixel(x, y);
+                    var currentPixel = image.GetPixel(x, y);
 
                     if (currentPixel.ToArgb() == Color.Black.ToArgb())
                     {
@@ -210,11 +225,11 @@ namespace PathFinding
                 }
             }
 
-            for (int x = 0; x < bmp.Width; x++)
+            for (int x = 0; x < image.Width; x++)
             {
-                for (int y = 0; y < bmp.Height; y++)
+                for (int y = 0; y < image.Height; y++)
                 {
-                    var firstPixel = bmp.GetPixel(x, y);
+                    var firstPixel = image.GetPixel(x, y);
 
                     if (firstPixel.ToArgb() == Color.Black.ToArgb())
                     {
@@ -235,14 +250,17 @@ namespace PathFinding
             return array[0];
         }
 
-        private BitArray GetBitArrayFromByte(byte byteje)
+        private BitArray GetBitArrayFromByte(byte byteValue)
         {
-            BitArray b = new BitArray(new byte[1] { byteje });
+            BitArray b = new BitArray(new byte[1] { byteValue });
             return b;
         }
 
     }
 
+    /// <summary>
+    /// Simple struct used to keep track of all the map points
+    /// </summary>
     public struct MPoint
     {
         public int X, Y;
@@ -254,7 +272,8 @@ namespace PathFinding
     }
 
     /// <summary>
-    /// First attemp to represent the map
+    /// This class represents a Map object encapsulating all 
+    /// the bit informaiton in a MapArray object
     /// </summary>
     public class Map
     {
@@ -295,7 +314,9 @@ namespace PathFinding
         }
 
     }
-
+    /// <summary>
+    /// Map Array object taking care of the bitwise operations.
+    /// </summary>
     internal class MapArray
     {
         internal int[] data;
@@ -312,12 +333,12 @@ namespace PathFinding
                 if (value)
                 {
                     int a = 1 << y;
-                    data[y / 32] |= a;
+                    data[y / 32] |= a; //bitwise inclusive 
                 }
                 else
                 {
-                    int a = ~(1 << y);
-                    data[y / 32] &= a;
+                    int a = ~(1 << y); //lets flip some bits
+                    data[y / 32] &= a; //Bitwise AND 
                 }
             }
             get

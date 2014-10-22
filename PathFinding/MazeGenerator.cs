@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace PathFinding
 {
     /// <summary>
-    /// Helper class that allow us to test the pathfinder with multiple and random inputs
-    /// without having to have a file for testing.
+    /// Helper class that allow us to test the pathfinder with multiple in memory generated maps
+    /// this allow us to test the pathfinder without having to have a new file everytime.
     /// </summary>
     public class MazeGenerator 
     {
@@ -134,6 +134,10 @@ namespace PathFinding
             }
         }
 
+        /// <summary>
+        /// Simple point verification
+        /// </summary>
+        /// <returns>true if valid false otherwise</returns>
         private static bool IsValid(int x, int y, Map map, Maze maze)
         {
             if (x > 0 && x < maze.Width - 1 && y > 0 && y < maze.Height - 1)
