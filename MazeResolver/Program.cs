@@ -13,35 +13,30 @@ namespace MazeResolver
     {
         static void Main(string[] args)
         {
-           // OpenMazeAndGenerateFile("inputSmall.png");
-            GenerateMazeAndSaveIt(100, 100);
+            //OpenMazeAndGenerateFile("inputSmall.png");
+            GenerateMazeAndSolveIt(50, 50);
         }
-
 
         public static void OpenMazeAndGenerateFile(string fileName)
         {
             Bitmap bmp = (Bitmap)Image.FromFile(fileName);
-
-
-
-            var maze = new Maze(bmp.Width, bmp.Height);
-            maze.LoadFileAsMap(fileName);
+            var maze = new Maze(bmp);
 
             var path = PathFinder.Find(new MPoint(1, 1), new MPoint(bmp.Width - 3, bmp.Height - 3), maze.Map);
 
 
             maze.Save("MustBeSameAsInput.png", ImageFormat.Png);
-            maze.SolveAndSave("SolvedMaze.Png", ImageFormat.Png, path);
+            maze.Save("SolvedMaze.Png", ImageFormat.Png, path);
         }
 
 
         
         /// <summary>
-        /// Generates a map then saves the g
+        /// Generates, solves and save a maze
         /// </summary>
         /// <param name="width">The width for the map</param>
         /// <param name="height">The height for the map</param>
-        public static void GenerateMazeAndSaveIt(int width, int height)
+        public static void GenerateMazeAndSolveIt(int width, int height)
         {
             var o = new MazeGenerator();
             var maze = o.Generate(width, height);
@@ -52,7 +47,7 @@ namespace MazeResolver
             var path = PathFinder.Find(startingPoint, endPoint, maze.Map);
             maze.Save("generatedMaze.png", ImageFormat.Png);
 
-            maze.SolveAndSave("generatedMazeSolved1.png", ImageFormat.Png, path);
+            maze.Save("generatedMazeSolved1.png", ImageFormat.Png, path);
         }
 
 

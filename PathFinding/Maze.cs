@@ -11,80 +11,40 @@ using System.Threading.Tasks;
 
 namespace PathFinding
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Maze
     {
         internal Map map;
-        public void LoadFileAsMap(string fileName)
-        {
-            var bmp = (Bitmap)Image.FromFile(fileName);
-
-            for (int y = 0; y < bmp.Height; y++)
-            {
-                for (int x = 0; x < bmp.Width; x++)
-                {
-                    var currentPixel = bmp.GetPixel(x, y);
-
-                    if (currentPixel.ToArgb() == Color.Black.ToArgb())
-                    {
-                        map[x, y] = false;
-                    }
-                    else
-                    {
-                        map[x, y] = true;
-                    }
-                }
-            }
-
-            for (int x = 0; x < bmp.Width; x++)
-            {
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    var firstPixel = bmp.GetPixel(x, y);
-
-                    if (firstPixel.ToArgb() == Color.Black.ToArgb())
-                    {
-                        map[x, y] = false;
-                    }
-                    else
-                    {
-                        map[x, y] = true;
-                    }
-
-                }
-
-            }
-        }
-        private void AddWall(List<Wall> walls, int xStart, int yStart, int xEnd, int yEnd)
-        {
-            if (xEnd - xStart <= 1 && yEnd - yStart <= 1)
-            {
-                return;
-            }
-
-            Wall wall = new Wall(xStart, yStart, xEnd, yEnd);
-            walls.Add(wall);
-        }
-        public Map Map
-        {
-            get { return map; }
-        }
-        public Maze(int width, int height)
-        {
-            map = new InnerMap(width, height);
-        }
-        public Maze(Map concreteMap)
-        {
-            map = concreteMap;
-        }
         public int Width
         {
-
             get { return map.Width; }
         }
         public int Height
         {
             get { return map.Height; }
         }
+        public Map Map
+        {
+            get { return map; }
+        }
+        public Maze(Bitmap image)
+        {
+            map = new Map(image.Width, image.Height);
+            LoadBitmapAsMap(image);
+        }
+
+        public Maze(int width, int height)
+        {
+            map = new Map(width, height);
+        }
+       
+        /// <summary>
+        /// Allow us to save as a file based on the current content of map.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="imageFormat"></param>
         public void Save(String fileName, ImageFormat imageFormat)
         {
             using (Bitmap bitmap = new Bitmap(map.Width - 1, map.Height - 1, PixelFormat.Format1bppIndexed))
@@ -131,20 +91,8 @@ namespace PathFinding
                 bitmap.Save(fileName, imageFormat);
             }
         }
-        private int GetIntFromBitArray(BitArray bitArray)
-        {
-            int[] array = new int[1];
-            bitArray.CopyTo(array, 0);
-            return array[0];
-        }
 
-        private BitArray GetBitArrayFromByte(byte byteje)
-        {
-            BitArray b = new BitArray(new byte[1] { byteje });
-            return b;
-        }
-
-        public void SolveAndSave(String fileName, ImageFormat imageFormat, List<MPoint> path)
+        public void Save(String fileName, ImageFormat imageFormat, List<MPoint> path)
         {
 
             using (Bitmap objBmpImage = new Bitmap(map.Width - 1, map.Height - 1, PixelFormat.Format4bppIndexed))
@@ -243,50 +191,55 @@ namespace PathFinding
             }
         }
 
-
-        /// <summary>
-        /// This method gets a coolection of Walls and fill up our inner map
-        /// </summary>
-        /// <param name="walls"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        public Maze Load(List<Wall> walls, int width, int height)
+        private void LoadBitmapAsMap(Bitmap bmp)
         {
-            Maze m = new Maze(width, height);
-
-            for (int y = 0; y < m.Height - 1; y++) //TODO remove -1
+            for (int y = 0; y < bmp.Height; y++)
             {
-                for (int x = 0; x < m.Width - 1; x++)
+                for (int x = 0; x < bmp.Width; x++)
                 {
-                    m.Map[x, y] = true;
-                }
-            }
+                    var currentPixel = bmp.GetPixel(x, y);
 
-            foreach (var wall in walls)
-            {
-                if (wall.yStart == wall.yEnd)
-                {
-                    for (int x = wall.xStart; x <= wall.xEnd; x++)
+                    if (currentPixel.ToArgb() == Color.Black.ToArgb())
                     {
-                        m.Map[x, wall.yStart] = false;
+                        map[x, y] = false;
                     }
-                }
-                else
-                {
-                    for (int y = wall.yStart; y <= wall.yEnd; y++)
+                    else
                     {
-                        m.Map[wall.xStart, y] = false;
+                        map[x, y] = true;
                     }
                 }
             }
 
-            return m;
+            for (int x = 0; x < bmp.Width; x++)
+            {
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    var firstPixel = bmp.GetPixel(x, y);
+
+                    if (firstPixel.ToArgb() == Color.Black.ToArgb())
+                    {
+                        map[x, y] = false;
+                    }
+                    else
+                    {
+                        map[x, y] = true;
+                    }
+                }
+            }
         }
 
+        private int GetIntFromBitArray(BitArray bitArray)
+        {
+            int[] array = new int[1];
+            bitArray.CopyTo(array, 0);
+            return array[0];
+        }
 
-
-
+        private BitArray GetBitArrayFromByte(byte byteje)
+        {
+            BitArray b = new BitArray(new byte[1] { byteje });
+            return b;
+        }
 
     }
 
@@ -300,7 +253,10 @@ namespace PathFinding
         }
     }
 
-    public abstract class Map
+    /// <summary>
+    /// First attemp to represent the map
+    /// </summary>
+    public class Map
     {
         private int _width;
         private int _height;
@@ -309,36 +265,24 @@ namespace PathFinding
         {
             get { return _width; }
         }
-
-
         public int Height
         {
             get { return _height; }
         }
 
+        private MapArray[] innerData;
+
         public Map(int width, int height)
         {
             this._width = width;
             this._height = height;
-        }
-
-        public abstract Boolean this[int x, int y] { get; set; }
-    }
-
-    public class InnerMap : Map
-    {
-        private InnerMapArray[] innerData;
-
-        public InnerMap(int width, int height)
-            : base(width, height)
-        {
-            innerData = new InnerMapArray[width];
+            innerData = new MapArray[width];
 
             for (int i = 0; i < width; i++)
-                innerData[i] = new InnerMapArray(height);
+                innerData[i] = new MapArray(height);
         }
 
-        public override Boolean this[int x, int y]
+        public Boolean this[int x, int y]
         {
             get
             {
@@ -352,41 +296,13 @@ namespace PathFinding
 
     }
 
-    class DotNetBitArrayInnerMap : InnerMap
+    internal class MapArray
     {
-        private BitArray[] innerData;
+        internal int[] data;
 
-        public DotNetBitArrayInnerMap(int width, int height)
-            : base(width, height)
+        public MapArray(int height)
         {
-            innerData = new BitArray[width];
-            for (int i = 0; i < width; i++)
-            {
-                innerData[i] = new BitArray(height);
-            }
-        }
-
-        public override Boolean this[int x, int y]
-        {
-            get
-            {
-                return innerData[x][y];
-            }
-            set
-            {
-                innerData[x][y] = value;
-            }
-        }
-    }
-
-
-    public class InnerMapArray
-    {
-        internal int[] innerData;
-
-        public InnerMapArray(int height)
-        {
-            innerData = new int[height / 32 + 1];
+            data = new int[height / 32 + 1];
         }
 
         public bool this[int y]
@@ -396,17 +312,17 @@ namespace PathFinding
                 if (value)
                 {
                     int a = 1 << y;
-                    innerData[y / 32] |= a;
+                    data[y / 32] |= a;
                 }
                 else
                 {
                     int a = ~(1 << y);
-                    innerData[y / 32] &= a;
+                    data[y / 32] &= a;
                 }
             }
             get
             {
-                return (innerData[y / 32] & (1 << y)) != 0;
+                return (data[y / 32] & (1 << y)) != 0;
             }
         }
     }

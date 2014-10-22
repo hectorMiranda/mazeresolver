@@ -23,23 +23,19 @@ namespace PathFinding
             int width = map.Width;
             int height = map.Height;
 
-
             List<MPoint> stackje = new List<MPoint>();
             stackje.Add(start);
 
             MPoint cur = new MPoint();
             MPoint prev = new MPoint(-1, -1);
 
-
             var lastBackTrackDir = -1;
 
             while (stackje.Count != 0)
             {
-
                 cur = stackje[stackje.Count - 1];
                 var x = cur.X;
                 var y = cur.Y;
-
 
                 MPoint target = new MPoint(-1, -1);
                 //Make sure the point was not the previous point, also make sure that the point is white, also make sure that if we backtracked we don't go to a direction we already went to

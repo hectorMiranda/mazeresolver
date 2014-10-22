@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace PathFinding
 {
-
+    /// <summary>
+    /// Helper class that allow us to test the pathfinder with multiple and random inputs
+    /// without having to have a file for testing.
+    /// </summary>
     public class MazeGenerator 
     {
         /// <summary>
