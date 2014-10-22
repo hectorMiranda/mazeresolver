@@ -13,7 +13,7 @@ namespace MazeResolver
     {
         static void Main(string[] args)
         {
-            //OpenMazeAndGenerateFile("inputSmall.png");
+            OpenMazeAndGenerateFile("input.png");
             GenerateMazeAndSolveIt(50, 50);
         }
 
@@ -22,10 +22,10 @@ namespace MazeResolver
             Bitmap bmp = (Bitmap)Image.FromFile(fileName);
             var maze = new Maze(bmp);
 
-            var path = PathFinder.Find(new MPoint(1, 1), new MPoint(bmp.Width - 3, bmp.Height - 3), maze.Map);
-
-
             maze.Save("MustBeSameAsInput.png", ImageFormat.Png);
+
+            var path = PathFinder.FindDepthFirst(new MPoint(1, 1), new MPoint(bmp.Width - 13, bmp.Height - 13), maze.Map);
+            
             maze.Save("SolvedMaze.Png", ImageFormat.Png, path);
         }
 
@@ -44,7 +44,7 @@ namespace MazeResolver
             var startingPoint = new MPoint(1, 1); 
             var endPoint = new MPoint(width - 3, height - 3);
 
-            var path = PathFinder.Find(startingPoint, endPoint, maze.Map);
+            var path = PathFinder.FindDepthFirst(startingPoint, endPoint, maze.Map);
             maze.Save("generatedMaze.png", ImageFormat.Png);
 
             maze.Save("generatedMazeSolved1.png", ImageFormat.Png, path);

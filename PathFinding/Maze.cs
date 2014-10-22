@@ -47,7 +47,7 @@ namespace PathFinding
         /// <param name="imageFormat"></param>
         public void Save(String fileName, ImageFormat imageFormat)
         {
-            using (Bitmap bitmap = new Bitmap(map.Width - 1, map.Height - 1, PixelFormat.Format1bppIndexed))
+            using (Bitmap bitmap = new Bitmap(map.Width, map.Height, PixelFormat.Format1bppIndexed))
             {
 
                 Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
@@ -60,7 +60,7 @@ namespace PathFinding
 
                 Marshal.Copy(ptr, rgbValues, 0, bytes);
 
-                for (int y = 0; y < map.Height - 1; y++)
+                for (int y = 0; y < map.Height; y++)
                 {
                     int counter = bmpData.Stride * y;
                     int x = 0;
@@ -95,7 +95,7 @@ namespace PathFinding
         public void Save(String fileName, ImageFormat imageFormat, List<MPoint> path)
         {
 
-            using (Bitmap objBmpImage = new Bitmap(map.Width - 1, map.Height - 1, PixelFormat.Format4bppIndexed))
+            using (Bitmap objBmpImage = new Bitmap(map.Width-1, map.Height-1, PixelFormat.Format4bppIndexed))
             {
                 Rectangle rect = new Rectangle(0, 0, objBmpImage.Width, objBmpImage.Height);
                 BitmapData bmpData = objBmpImage.LockBits(rect, ImageLockMode.ReadWrite, objBmpImage.PixelFormat);
@@ -106,13 +106,13 @@ namespace PathFinding
 
                 Marshal.Copy(pointer, rgbValues, 0, bytes);
 
-                for (int y = 0; y < map.Height - 1; y++)
+                for (int y = 0; y < map.Height-1; y++)
                 {
                     int counter = bmpData.Stride * y;
                     int x = 0;
                     for (int i = 0; i < bmpData.Stride; i++)
                     {
-                        if (x > objBmpImage.Width)
+                        if (x >= objBmpImage.Width)
                         {
                             break;
                         }

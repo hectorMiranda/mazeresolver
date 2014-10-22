@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeResolverConsole", "Maze
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFinding", "..\PathFinding\PathFinding.csproj", "{76DAF0F6-2248-4343-99D2-47F6589476DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeResolverModule", "MazeResolverModule\MazeResolverModule.csproj", "{B9BD673A-FF01-4F8F-BD3C-E9FEDD1102A7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{76DAF0F6-2248-4343-99D2-47F6589476DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76DAF0F6-2248-4343-99D2-47F6589476DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76DAF0F6-2248-4343-99D2-47F6589476DD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9BD673A-FF01-4F8F-BD3C-E9FEDD1102A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9BD673A-FF01-4F8F-BD3C-E9FEDD1102A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9BD673A-FF01-4F8F-BD3C-E9FEDD1102A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9BD673A-FF01-4F8F-BD3C-E9FEDD1102A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
