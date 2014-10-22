@@ -18,6 +18,8 @@ namespace PathFinding
     public class Maze
     {
         internal Map map;
+        public MPoint Start { get; set; }
+        public MPoint End { get; set; }
         public int Width
         {
             get { return map.Width; }
@@ -204,7 +206,7 @@ namespace PathFinding
         /// <summary>
         /// Set the values for the map in memory
         /// </summary>
-        /// <remarks>This mapper will actually identify the blu and red points, needed by the pathfinder</remarks>
+        /// <remarks>This mapper will also identify the blue and red points, needed by the pathfinder</remarks>
         /// <param name="image">A valid image</param>
         private void LoadBitmapAsMap(Bitmap image)
         {
@@ -221,6 +223,20 @@ namespace PathFinding
                     else
                     {
                         map[x, y] = true;
+                    }
+
+                    //hmmm this is so fragile, given all the potential red/blue values... :/
+                    if (currentPixel.ToArgb() == Color.Red.ToArgb()) 
+                    {
+                        Start = new MPoint(x, y);
+                        
+                        //Console.WriteLine(string.Format("red point at {0}-{1}", x, y));
+                    }
+
+                    if (currentPixel.ToArgb() == Color.Blue.ToArgb())
+                    {
+                        End = new MPoint(x, y);
+                        //Console.WriteLine(string.Format("blue point at {0}-{1}", x, y));
                     }
                 }
             }

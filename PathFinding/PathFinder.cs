@@ -11,11 +11,11 @@ namespace PathFinding
         private static Random r = new Random();
         
         /// <summary>
-        /// A Depth-First search implementation where the frontier acts like a last-in first-out stack. 
+        /// This is a Depth-First search implementation where the frontier acts like a last-in first-out stack. 
         /// The elements are added to the stack one at a time. 
         /// The one selected and taken off the frontier at any time is the last element that was added.
         /// </summary>
-        public static List<MPoint> FindDepthFirst(MPoint start, MPoint end, Map map)
+        public static List<MPoint> DepthFirstSearch(MPoint start, MPoint end, Map map)
         {
             int width = map.Width;
             int height = map.Height;

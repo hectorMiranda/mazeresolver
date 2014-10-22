@@ -1,5 +1,6 @@
 ﻿using PathFinding;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,48 +10,117 @@ using System.Drawing.Imaging;
 
 namespace MazeResolver
 {
+    /// <summary>
+    /// Testing console for the Bluebeam code project.
+    /// </summary>
+    /// <remarks>
+    /// My original intention was to write a Powershell module, which would allowed me to keep the code in a self-contained resuable unit,
+    /// however time ran out fast and I just choose to stick to the idea of the console as this will keep things simple.
+    /// </remarks>
     class Program
     {
         static void Main(string[] args)
         {
-            OpenMazeAndGenerateFile("input.png");
-            GenerateMazeAndSolveIt(50, 50);
+            if (args != null && args.Count()>=1)
+                ProcessFile(args);
+            else
+                EnterTestingMode();
         }
-
-        public static void OpenMazeAndGenerateFile(string fileName)
-        {
-            Bitmap bmp = (Bitmap)Image.FromFile(fileName);
-            var maze = new Maze(bmp);
-
-            maze.Save("MustBeSameAsInput.png", ImageFormat.Png);
-
-            var path = PathFinder.FindDepthFirst(new MPoint(1, 1), new MPoint(bmp.Width - 13, bmp.Height - 13), maze.Map);
-            
-            maze.Save("SolvedMaze.Png", ImageFormat.Png, path);
-        }
-
 
         
         /// <summary>
-        /// Generates, solves and save a maze
+        /// Extracts parameter info and process maze, writing output image solution to disk
         /// </summary>
-        /// <param name="width">The width for the map</param>
-        /// <param name="height">The height for the map</param>
-        public static void GenerateMazeAndSolveIt(int width, int height)
+        /// <remarks>With more time I would had added log4net for logging and exception handling purposes.</remarks>
+        private static void ProcessFile(string[] args)
         {
-            var o = new MazeGenerator();
-            var maze = o.Generate(width, height);
+            string input = args[0];
+            string output = string.Format("{0}_output{1}", Path.GetFileNameWithoutExtension(input), Path.GetExtension(input)); 
+            ImageFormat outputFormat = ImageFormat.Png; 
 
-            var startingPoint = new MPoint(1, 1); 
-            var endPoint = new MPoint(width - 3, height - 3);
+            if (args.Count() > 1)
+            {
+                output = args[1];
 
-            var path = PathFinder.FindDepthFirst(startingPoint, endPoint, maze.Map);
-            maze.Save("generatedMaze.png", ImageFormat.Png);
+                switch (Path.GetExtension(output.ToLower()))
+                { 
+                    case "png":
+                        outputFormat = ImageFormat.Png;
+                        break;
+                    case "bmp":
+                        outputFormat = ImageFormat.Bmp;
+                        break;
+                    case "jpg":
+                        outputFormat = ImageFormat.Png;
+                        break;
+                }
+            }
 
-            maze.Save("generatedMazeSolved1.png", ImageFormat.Png, path);
+            try
+            {
+                Console.WriteLine(string.Format("Processing {0} ...", input));
+
+                var maze = new Maze((Bitmap)Image.FromFile(input));
+                var startTime = DateTime.UtcNow;
+                var path = PathFinder.DepthFirstSearch(maze.Start, maze.End, maze.Map);
+                var totalTime = (DateTime.UtcNow - startTime).Milliseconds;
+                Console.WriteLine(string.Format("Finding path took: {0} ms", totalTime));
+                maze.Save(output, outputFormat, path);
+                
+                Console.WriteLine(string.Format("File {0} has being created ...", output));
+            }
+            catch (Exception up)
+            {
+                if (up is FileNotFoundException || up is OutOfMemoryException)
+                    Console.WriteLine(string.Format("Exception: {0}", up.Message));                 
+                else
+                    throw up; // :)
+            }
+
         }
 
 
 
+        /// <summary>
+        /// Due to time constrains I decided to test this project by generating a new map A in memory, writing A to disk, finding the path and finally writing a new map B to disk.
+        /// In a proper production environment a test project would be added containing all the test methods there. 
+        /// </summary>
+        private static void EnterTestingMode()
+        {
+            Console.WriteLine("Maze Resolver 0.1 ");
+            Console.WriteLine("You are entering testing mode, to avoid this behavior use the following syntax:");
+            Console.WriteLine("maze.exe inputImageFile [outFile]");
+
+            int width;
+            int height;
+
+            Console.WriteLine("Enter width:");
+            if (!int.TryParse(Console.ReadLine(), out width))
+                width = 300;
+            Console.WriteLine("Enter height:");
+            if (!int.TryParse(Console.ReadLine(), out height))
+                height = 300;
+
+            string mazeFileName = "TestMaze.png";
+            string mazeFileNameSolved = "TestMaze_solved.png";
+
+            var o = new MazeGenerator();
+            Console.WriteLine("Generating Maze");
+            var maze = o.Generate(width, height);
+
+            var startingPoint = new MPoint(1, 1);
+            var endPoint = new MPoint(width - 3, height - 3);
+
+            Console.WriteLine("Finding path");
+            var startTime = DateTime.UtcNow;
+            var path = PathFinder.DepthFirstSearch(startingPoint, endPoint, maze.Map);
+            var totalTime = (DateTime.UtcNow - startTime).Milliseconds;
+            Console.WriteLine(string.Format("Finding path took: {0} ms",totalTime ));
+
+
+            Console.WriteLine(string.Format("Generated files are {0} : {1}", mazeFileName, mazeFileNameSolved));
+            maze.Save(mazeFileName, ImageFormat.Png); 
+            maze.Save(mazeFileNameSolved, ImageFormat.Png, path);
+        }
     }
 }
